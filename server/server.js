@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
 mongoose.connect("mongodb://127.0.0.1:27017/code-block");
-
+const roomCounts = {};
 const db = mongoose.connection;
 
 db.on("connected", () => {
@@ -21,8 +21,8 @@ const CodeBlock = mongoose.model(
   new mongoose.Schema({
     title: String,
     code: String,
+    accessed: Boolean,
     solution: String,
-    accessCount: { type: Number, default: 0 },
   })
 );
 
@@ -36,21 +36,34 @@ app.get("/api/codeblocks", async (req, res) => {
 
 app.get("/api/codeblocks/:id", async (req, res) => {
   const codeblock = await CodeBlock.findById(req.params.id);
+  codeblock["accessed"] = roomCounts[codeblock._id].length === 2;
   res.json(codeblock);
-  if (codeblock.accessCount === 0) {
-    codeblock.accessCount = 1;
-  }
-  codeblock.save();
 });
 
 io.on("connection", (socket) => {
+  console.log("---------------------------------");
   console.log("Client connected:", socket.id);
 
-  socket.on("code_update", (data) => {
-    socket.broadcast.emit("code_update", data);
+  socket.on("joinCodeblock", (codeblockId, callback) => {
+    //socket.join(codeblockId);
+    if (!roomCounts[codeblockId]) {
+      roomCounts[codeblockId] = [];
+    }
+    roomCounts[codeblockId].push(socket.id);
+    //console.log(`Client joined codeblock ${codeblockId}`);
+    callback({ status: "joined" });
+  });
+
+  socket.on("codeUpdate", (data) => {
+    socket.broadcast.emit("codeUpdate", data);
   });
 
   socket.on("disconnect", () => {
+    Object.keys(roomCounts).forEach((roomKey) => {
+      roomCounts[roomKey] = roomCounts[roomKey].filter(
+        (clientId) => clientId !== socket.id
+      );
+    });
     console.log("Client disconnected:", socket.id);
   });
 });

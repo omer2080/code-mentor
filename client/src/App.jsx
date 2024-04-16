@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import Lobby from "./components/Lobby";
 import { BrowserRouter, Routes, Route } from "react-router-dom";

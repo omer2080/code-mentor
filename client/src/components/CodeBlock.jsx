@@ -1,43 +1,61 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import { useParams } from "react-router-dom";
 
-const socket = io("http://localhost:3001");
-
 const CodeBlock = () => {
   const [code, setCode] = useState("");
+  const [solution, setSolution] = useState("");
   const [isMentor, setIsMentor] = useState(false);
-  let { codeBlockId } = useParams();
+  const [showSmile, setShowSmile] = useState(false);
+  const { codeBlockId } = useParams();
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/codeblocks/${codeBlockId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setCode(data.code);
-        setIsMentor(false);
-        data.accessed = true;
-      });
+    socketRef.current = io("http://localhost:3001");
 
-    socket.on("code_update", handleSocketUpdate);
-  }, []);
+    socketRef.current.emit("joinCodeblock", codeBlockId, (response) => {
+      if (response.status === "joined") {
+        fetch(`http://localhost:3001/api/codeblocks/${codeBlockId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            setCode(data.code);
+            setSolution(data.solution);
+            setIsMentor(!data.accessed);
+          })
+          .catch((error) => console.error("Error fetching data:", error));
+      }
+    });
 
-  const handleSocketUpdate = (updatedCode) => {
-    setCode(updatedCode);
-  };
+    socketRef.current.on("codeUpdate", (updatedCode) => {
+      setCode(updatedCode);
+    });
+
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, [codeBlockId]);
 
   const handleChange = (e) => {
     const updatedCode = e.target.value;
     setCode(updatedCode);
-    socket.emit("code_update", updatedCode);
+    socketRef.current.emit("codeUpdate", updatedCode);
   };
 
+  useEffect(() => {
+    if (code && code === solution) setShowSmile(true);
+  }, [code]);
+
   return (
-    <textarea
-      value={code}
-      onChange={handleChange}
-      readOnly={isMentor}
-      className="code-editor"
-    />
+    <>
+      <textarea
+        value={code}
+        style={{ width: "500px", height: "200px" }}
+        onChange={handleChange}
+        readOnly={isMentor}
+        className="code-editor"
+      />
+      {showSmile && <div>😊</div>}
+    </>
   );
 };
 
