@@ -1,6 +1,5 @@
 const express = require("express");
 const http = require("http");
-const path = require("path");
 const socketIo = require("socket.io");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -41,12 +40,6 @@ app.get("/api/codeblocks/:id", async (req, res) => {
   const codeblock = await CodeBlock.findById(req.params.id);
   codeblock["accessed"] = roomCounts[codeblock._id].length === 2;
   res.json(codeblock);
-});
-
-app.use(express.static(path.join(__dirname, "../client/dist")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
 });
 
 io.on("connection", (socket) => {
