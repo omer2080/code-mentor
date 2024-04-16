@@ -11,11 +11,11 @@ const CodeBlock = () => {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    socketRef.current = io("http://localhost:3001");
+    socketRef.current = io("http://localhost");
 
     socketRef.current.emit("joinCodeblock", codeBlockId, (response) => {
       if (response.status === "joined") {
-        fetch(`http://localhost:3001/api/codeblocks/${codeBlockId}`)
+        fetch(`http://localhost/api/codeblocks/${codeBlockId}`)
           .then((response) => response.json())
           .then((data) => {
             setCode(data.code);
