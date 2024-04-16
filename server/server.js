@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const socketIo = require("socket.io");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -40,17 +41,22 @@ app.get("/api/codeblocks/:id", async (req, res) => {
   res.json(codeblock);
 });
 
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
+
 io.on("connection", (socket) => {
   console.log("---------------------------------");
   console.log("Client connected:", socket.id);
 
   socket.on("joinCodeblock", (codeblockId, callback) => {
-    //socket.join(codeblockId);
     if (!roomCounts[codeblockId]) {
       roomCounts[codeblockId] = [];
     }
     roomCounts[codeblockId].push(socket.id);
-    //console.log(`Client joined codeblock ${codeblockId}`);
+    console.log(`Client joined codeblock ${codeblockId}`);
     callback({ status: "joined" });
   });
 
