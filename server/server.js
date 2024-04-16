@@ -9,7 +9,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
-mongoose.connect("mongodb://127.0.0.1:27017/code-block");
+mongoose.connect(
+  "mongodb+srv://otam:J8cPVZHShtdi3awW@cluster0.md3necj.mongodb.net/code-block"
+);
 const roomCounts = {};
 const db = mongoose.connection;
 
