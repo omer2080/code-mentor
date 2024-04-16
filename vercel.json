@@ -15,8 +15,12 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/static/(.*)",
+      "dest": "/client/dist/static/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/client/build/index.html"
+      "dest": "/client/dist/index.html"
     }
   ]
 }
