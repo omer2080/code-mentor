@@ -11,11 +11,11 @@ const CodeBlock = () => {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    socketRef.current = io("http://localhost:5000");
+    socketRef.current = io("");
 
     socketRef.current.emit("joinCodeblock", codeBlockId, (response) => {
       if (response.status === "joined") {
-        fetch(`http://localhost:5000/api/codeblocks/${codeBlockId}`)
+        fetch(`https://code-mentor.onrender.com/api/codeblocks/${codeBlockId}`)
           .then((response) => response.json())
           .then((data) => {
             setCode(data.code);
