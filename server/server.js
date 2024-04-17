@@ -3,6 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -28,6 +29,8 @@ const CodeBlock = mongoose.model(
   })
 );
 
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
 app.use(cors());
 app.use(express.json());
 
@@ -40,6 +43,10 @@ app.get("/api/codeblocks/:id", async (req, res) => {
   const codeblock = await CodeBlock.findById(req.params.id);
   codeblock["accessed"] = roomCounts[codeblock._id].length === 2;
   res.json(codeblock);
+});
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
 });
 
 io.on("connection", (socket) => {
@@ -75,7 +82,7 @@ const ensureCodeBlocks = async () => {
 
   await CodeBlock.create([
     {
-      title: "Async Case",
+      title: "Even or Odd Numbers",
       code: "async function fetchData() { return await fetch('api/data'); }",
       solution:
         "async function fetchData() { return await fetch('api/data').then(res => res.json()); }",
