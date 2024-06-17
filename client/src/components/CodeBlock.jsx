@@ -43,6 +43,7 @@ const CodeBlock = () => {
 
   useEffect(() => {
     if (code && code === solution) setShowSmile(true);
+    else setShowSmile(false);
   }, [code]);
 
   return (

@@ -13,12 +13,14 @@ const Lobby = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Choose code block</h1>
-      <ul>
+    <div className="container">
+      <h1 className="title">Choose code block:</h1>
+      <ul className="codeBlockList">
         {codeBlocks.map((block) => (
-          <li key={block._id}>
-            <Link to={`/codeblock/${block._id}`}>{block.title}</Link>
+          <li className="codeBlockItem" key={block._id}>
+            <Link className="styledLink" to={`/codeblock/${block._id}`}>
+              {block.title}
+            </Link>
           </li>
         ))}
       </ul>
