@@ -50,7 +50,7 @@ const CodeBlock = () => {
     <>
       <textarea
         value={code}
-        style={{ width: "500px", height: "200px" }}
+        style={{ width: "500px", height: "200px", fontSize: "16px" }}
         onChange={handleChange}
         readOnly={isMentor}
         className="code-editor"

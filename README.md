@@ -53,3 +53,9 @@ Run the React application:
 #### npm run dev
 
 Open browser with the client URL.
+
+
+## Deployment
+
+This project has been deployed and is accessible online at [code-mentor.onrender.com](https://code-mentor.onrender.com).
+
