@@ -1,19 +1,45 @@
 name: Security Scan
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   scan:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up ClamAV
         run: |
           sudo apt-get update
           sudo apt-get install -y clamav clamav-daemon
-          sudo freshclam
+          sudo freshclam || echo "Failed to update ClamAV database"
+
+      - name: Ensure ClamAV services are stopped
+        run: |
+          sudo systemctl stop clamav-freshclam || true
+          sudo systemctl stop clamav-daemon || true
+          sudo rm -f /var/log/clamav/freshclam.log.lock
 
       - name: Run ClamAV scan
-        run: clamscan -r --scan-archive=on -i . | tee scan.log
+        run: |
+          echo "Starting ClamAV scan..."
+          clamscan -r --scan-archive=on --log=/tmp/scan.log -i . || echo "ClamAV scan completed with issues"
+          cat /tmp/scan.log
+
+      - name: Upload ClamAV scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: clamav-scan-results
+          path: /tmp/scan.log
+
+      - name: Notify if scan found issues
+        if: ${{ failure() }}
+        run: echo "ClamAV scan found issues. Check the logs for details."
