@@ -31,8 +31,12 @@ jobs:
       - name: Run ClamAV scan
         run: |
           echo "Starting ClamAV scan..."
-          clamscan -r --scan-archive=on --log=/tmp/scan.log -i . || echo "ClamAV scan completed with issues"
-          cat /tmp/scan.log
+          clamscan -r --scan-archive=yes --log=/tmp/scan.log -i . || echo "ClamAV scan completed with issues"
+          if [ -f /tmp/scan.log ]; then
+            cat /tmp/scan.log
+          else
+            echo "No scan log file found"
+          fi
 
       - name: Upload ClamAV scan results
         uses: actions/upload-artifact@v3
