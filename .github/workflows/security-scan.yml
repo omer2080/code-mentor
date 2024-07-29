@@ -16,22 +16,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+        # freshclam downloads the latest virus definition databases from ClamAV's update servers.
+        # Workflow will continue even if freshclam fails
       - name: Set up ClamAV
         run: |
           sudo apt-get update
           sudo apt-get install -y clamav clamav-daemon
           sudo freshclam || echo "Failed to update ClamAV database"
 
+        # Stops services and removes lock files to prevent conflicts
       - name: Ensure ClamAV services are stopped
         run: |
           sudo systemctl stop clamav-freshclam || true
           sudo systemctl stop clamav-daemon || true
           sudo rm -f /var/log/clamav/freshclam.log.lock
 
+        # (-r): Runs the ClamAV scan recursively
       - name: Run ClamAV scan
         run: |
           echo "Starting ClamAV scan..."
-          clamscan -r --scan-archive=yes --log=/tmp/scan.log -i . || echo "ClamAV scan completed with issues"
+          clamscan -r --log=/tmp/scan.log -i . || echo "ClamAV scan completed, but there were issues"
           if [ -f /tmp/scan.log ]; then
             cat /tmp/scan.log
           else
@@ -44,6 +48,7 @@ jobs:
           name: clamav-scan-results
           path: /tmp/scan.log
 
+      # Runs only if the previous steps encountered failures
       - name: Notify if scan found issues
         if: ${{ failure() }}
-        run: echo "ClamAV scan found issues. Check the logs for details."
+        run: echo "ClamAV scan found issues."
