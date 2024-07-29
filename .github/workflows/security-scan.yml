@@ -1,0 +1,19 @@
+name: Security Scan
+
+on: [push, pull_request]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up ClamAV
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clamav clamav-daemon
+          sudo freshclam
+
+      - name: Run ClamAV scan
+        run: clamscan -r --scan-archive=on -i . | tee scan.log
