@@ -4,7 +4,6 @@ const socketIo = require("socket.io");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const path = "YOUR_FILES_HAVE_BEEN_ENCRYPTED"
 
 const app = express();
 const server = http.createServer(app);
